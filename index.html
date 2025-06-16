@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luminosity Calculator for e⁺e⁻ colliders -- Beta version - Author Oliver Buchmueller, Imperial College London</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        h1 {
+            color: #2c5282;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .description {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-left: 4px solid #007bff;
+            padding: 20px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .reference {
+            background: linear-gradient(135deg, #e8f4fd, #d1ecf1);
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            border-radius: 8px;
+            border: 1px solid #b8daff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .detailed-formulas {
+            background: linear-gradient(135deg, #fff9e6, #fff3d4);
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 13px;
+            line-height: 1.6;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .formula-section {
+            margin-bottom: 15px;
+        }
+        .formula-section h4 {
+            color: #b8860b;
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .formula {
+            font-family: 'Courier New', monospace;
+            background: rgba(255,255,255,0.7);
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 5px 0;
+            border-left: 3px solid #ffc107;
+        }
+        .excel-grid {
+            display: grid;
+            grid-template-columns: 200px 150px 150px;
+            gap: 1px;
+            background-color: #ddd;
+            border: 1px solid #aaa;
+            margin-bottom: 20px;
+        }
+        .cell {
+            background: white;
+            padding: 8px;
+            border: 1px solid #ddd;
+            font-size: 12px;
+        }
+        .header {
+            background: linear-gradient(135deg, #e8f4fd, #d1ecf1);
+            font-weight: bold;
+            text-align: center;
+            border-bottom: 2px solid #007bff;
+        }
+        .label {
+            background: #f0f8ff;
+            font-weight: bold;
+        }
+        .input {
+            background: #fffacd;
+        }
+        .output {
+            background: #f0fff0;
+        }
+        .output.highlight {
+            background: linear-gradient(135deg, #ffe6e6, #ffcccc);
+            border: 2px solid #dc3545;
+            font-weight: bold;
+            color: #721c24;
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 11px;
+            transition: border-color 0.3s ease;
+        }
+        input[type="number"]:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.1);
+        }
+        .scenario-selector {
+            margin-bottom: 20px;
+        }
+        select {
+            padding: 10px 15px;
+            font-size: 14px;
+            border-radius: 6px;
+            border: 2px solid #ddd;
+            background: white;
+            transition: border-color 0.3s ease;
+            min-width: 300px;
+        }
+        select:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+        }
+        .results-section {
+            margin-top: 30px;
+        }
+        .results-grid {
+            display: grid;
+            grid-template-columns: 200px repeat(6, 120px);
+            gap: 1px;
+            background-color: #ddd;
+            border: 1px solid #aaa;
+        }
+        .formula-note {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            font-size: 12px;
+        }
+        .constants {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Luminosity Calculator for e⁺e⁻ colliders -- Beta version</h1>
+        <p style="text-align: center; color: #666; margin-top: -10px; margin-bottom: 30px; font-style: italic;">Author: Oliver Buchmueller, Imperial College London</p>
+        
+        <div class="description">
+            <strong>About this tool:</strong> This calculator computes luminosity and beam-beam parameters for electron-positron colliders, accounting for crossing angle and hourglass effects. Enter beam parameters manually or select from predefined scenarios for major collider projects (LEP3, FCC-ee). The tool calculates geometric luminosity, reduction factors due to finite bunch length and crossing angles, beam-beam tune shifts, and related beam physics parameters in real-time.
+        </div>
+        
+        <div class="reference">
+            <strong>Reference:</strong> [1] T. Sen, "Luminosity and beam–beam tune shifts with crossing angle and hourglass effects in e⁺–e⁻ colliders," Fermilab Preprint, arXiv:2208.08615v1.
+        </div>
+        
+        <div class="scenario-selector">
+            <label for="scenario">Select Scenario: </label>
+            <select id="scenario" onchange="loadScenario()">
+                <option value="shatilov_new_55">Shatilov new (φ=0.55)</option>
+                <option value="shatilov_new_68">Shatilov new (φ=0.68)</option>
+                <option value="shatilov_old">Shatilov old</option>
+                <option value="lep3_zh">LEP3 ZH</option>
+                <option value="lep3_ww">LEP3 WW</option>
+                <option value="lep3_z">LEP3 Z</option>
+                <option value="lep3_h">LEP3-H (Chamonix)</option>
+                <option value="fcc_ee_h">FCC-ee-H (Chamonix)</option>
+                <option value="fcc_ee_z">FCC-ee (2025) Z</option>
+                <option value="fcc_ee_ww">FCC-ee (2025) WW</option>
+                <option value="fcc_ee_zh">FCC-ee (2025) ZH</option>
+                <option value="fcc_ee_tt">FCC-ee (2025) tt</option>
+            </select>
+        </div>
+
+        <div class="constants">
+            <strong>Physical Constants:</strong><br>
+            e = 1.602176634e-19 C | r_e = 2.8179403267e-15 m | m_ec2 = 0.000511 GeV | C_U = 8.85e-5 GeV³·m
+        </div>
+
+        <h2>Input Parameters</h2>
+        <div class="excel-grid">
+            <div class="cell header">Parameter</div>
+            <div class="cell header">Value</div>
+            <div class="cell header">Unit/Description</div>
+            
+            <div class="cell label">nb (bunches)</div>
+            <div class="cell input"><input type="number" id="nb" oninput="calculate()"></div>
+            <div class="cell">number of bunches</div>
+            
+            <div class="cell label">Nb (×10¹¹ particles/bunch)</div>
+            <div class="cell input"><input type="number" id="Nb" step="0.1" oninput="calculate()"></div>
+            <div class="cell">particles per bunch (×10¹¹)</div>
+            
+            <div class="cell label">circ (m)</div>
+            <div class="cell input"><input type="number" id="circ" oninput="calculate()"></div>
+            <div class="cell">circumference</div>
+            
+            <div class="cell label">σ_z (m)</div>
+            <div class="cell input"><input type="number" id="sigma_z" step="1e-4" oninput="calculate()"></div>
+            <div class="cell">bunch length</div>
+            
+            <div class="cell label">ε_x (m·rad)</div>
+            <div class="cell input"><input type="number" id="eps_x" step="1e-10" oninput="calculate()"></div>
+            <div class="cell">horizontal emittance</div>
+            
+            <div class="cell label">ε_y (m·rad)</div>
+            <div class="cell input"><input type="number" id="eps_y" step="1e-13" oninput="calculate()"></div>
+            <div class="cell">vertical emittance</div>
+            
+            <div class="cell label">β_x (m)</div>
+            <div class="cell input"><input type="number" id="beta_x" step="0.1" oninput="calculate()"></div>
+            <div class="cell">horizontal beta function</div>
+            
+            <div class="cell label">β_y (m)</div>
+            <div class="cell input"><input type="number" id="beta_y" step="1e-4" oninput="calculate()"></div>
+            <div class="cell">vertical beta function</div>
+            
+            <div class="cell label">θ (rad)</div>
+            <div class="cell input"><input type="number" id="theta" step="1e-4" oninput="calculate()"></div>
+            <div class="cell">crossing angle</div>
+            
+            <div class="cell label">E_beam (GeV)</div>
+            <div class="cell input"><input type="number" id="E_beam" step="1" oninput="calculate()"></div>
+            <div class="cell">beam energy</div>
+            
+            <div class="cell label">P_SR (MW)</div>
+            <div class="cell input"><input type="number" id="P_SR" step="1" oninput="calculate()"></div>
+            <div class="cell">synchrotron power</div>
+        </div>
+
+        <div class="results-section">
+            <h2>Calculated Results</h2>
+            <div class="results-grid">
+                <div class="cell header">Parameter</div>
+                <div class="cell header">φ</div>
+                <div class="cell header">R_hg</div>
+                <div class="cell header">R_ca</div>
+                <div class="cell header">R_full</div>
+                <div class="cell header">L_geom</div>
+                <div class="cell header">L_full</div>
+                
+                <div class="cell label">Value</div>
+                <div class="cell output" id="phi_result">-</div>
+                <div class="cell output" id="R_hg_result">-</div>
+                <div class="cell output" id="R_ca_result">-</div>
+                <div class="cell output" id="R_full_result">-</div>
+                <div class="cell output" id="L_geom_result">-</div>
+                <div class="cell output highlight" id="L_full_result">-</div>
+                
+                <div class="cell label">Unit/Description</div>
+                <div class="cell">Piwinski angle</div>
+                <div class="cell">Hourglass factor</div>
+                <div class="cell">Crossing angle factor</div>
+                <div class="cell">Full reduction factor</div>
+                <div class="cell">Geometric luminosity (×10³⁴)</div>
+                <div class="cell">Full luminosity (×10³⁴)</div>
+            </div>
+            
+            <br>
+            
+            <div class="results-grid">
+                <div class="cell header">Parameter</div>
+                <div class="cell header">ξ_y/IP</div>
+                <div class="cell header">I_beam</div>
+                <div class="cell header">U₀</div>
+                <div class="cell header">ρ_calc</div>
+                <div class="cell header"></div>
+                <div class="cell header"></div>
+                
+                <div class="cell label">Value</div>
+                <div class="cell output" id="xi_y_result">-</div>
+                <div class="cell output" id="I_beam_result">-</div>
+                <div class="cell output" id="U0_result">-</div>
+                <div class="cell output" id="rho_calc_result">-</div>
+                <div class="cell output"></div>
+                <div class="cell output"></div>
+                
+                <div class="cell label">Unit/Description</div>
+                <div class="cell">Vertical tune shift</div>
+                <div class="cell">Beam current (A)</div>
+                <div class="cell">Energy loss per turn (GeV)</div>
+                <div class="cell">Calculated ρ (m)</div>
+                <div class="cell"></div>
+                <div class="cell"></div>
+            </div>
+        </div>
+        
+        <div class="formula-note">
+            <h3>Excel Formula Translations:</h3>
+            <p><strong>φ (Piwinski angle):</strong> =sigma_z*TAN(theta/2)/SQRT(eps_x*beta_x)</p>
+            <p><strong>R_ca (Crossing angle factor):</strong> =1/SQRT(1+phi²)</p>
+            <p><strong>R_hg (Hourglass factor):</strong> Numerical integration approximation</p>
+            <p><strong>L_geom (Geometric luminosity):</strong> =nb*Nb²*f_rev/(4*PI()*sx*sy)*1e-4</p>
+            <p><strong>ξ_y (Vertical tune shift):</strong> =r_e*Nb/(2*PI()*gamma)*(beta_y/(sy*(sx+sy)))/SQRT(1+phi²)</p>
+            <p><strong>Note:</strong> Some formulas involve numerical integration which would require VBA or approximations in Excel</p>
+        </div>
+        
+        <div class="detailed-formulas">
+            <h3 style="color: #b8860b; margin-top: 0;">Detailed Formula Reference (Buchmueller, June 15, 2025)</h3>
+            
+            <div class="formula-section">
+                <h4>Full Luminosity</h4>
+                <div class="formula">L<sub>full</sub> = L<sub>geom</sub> × R<sub>full</sub></div>
+                <div class="formula">L<sub>geom</sub> = (n<sub>b</sub> N<sub>e</sub>² f<sub>rev</sub>) / (4π σ<sub>x</sub> σ<sub>y</sub>)</div>
+                <div class="formula">f<sub>rev</sub> = c/C, σ<sub>x,y</sub> = √(ε<sub>x,y</sub> β*<sub>x,y</sub>)</div>
+            </div>
+            
+            <div class="formula-section">
+                <h4>Hourglass Reduction Factor</h4>
+                <div class="formula">R<sub>hg</sub> = (1/√π) ∫<sub>-∞</sub><sup>∞</sup> e<sup>-u²</sup> / √[(1 + u²/u<sub>x</sub>²)(1 + u²/u<sub>y</sub>²)] du</div>
+                <div class="formula">u<sub>x</sub> = β*<sub>x</sub>/σ<sub>z</sub>, u<sub>y</sub> = β*<sub>y</sub>/σ<sub>z</sub></div>
+            </div>
+            
+            <div class="formula-section">
+                <h4>Crossing-Angle Reduction Factor</h4>
+                <div class="formula">R<sub>ca</sub> = 1/√(1 + Φ²), Φ = σ<sub>z</sub>/σ<sub>x</sub> × tan(θ/2)</div>
+            </div>
+            
+            <div class="formula-section">
+                <h4>Combined Reduction Factor</h4>
+                <div class="formula">R<sub>full</sub> = (cos(θ/2)/√π) ∫<sub>-∞</sub><sup>∞</sup> e<sup>-u²</sup> / √[(1 + u²/u<sub>x</sub>²)(1 + u²/u<sub>y</sub>²)] du</div>
+            </div>
+            
+            <div class="formula-section">
+                <h4>Bending Radius Extraction</h4>
+                <div class="formula">I<sub>beam</sub> = e f<sub>rev</sub> n<sub>b</sub> N<sub>e</sub></div>
+                <div class="formula">U₀ = P<sub>SR</sub> × 10⁶ / (I<sub>beam</sub> × 10⁹)</div>
+                <div class="formula">ρ = C<sub>U</sub> E<sub>beam</sub>⁴ / U₀, where C<sub>U</sub> = 8.85×10⁻⁵ GeV/(GeV⁴ m)</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Physical constants
+        const e = 1.602176634e-19;
+        const r_e = 2.8179403267e-15;
+        const m_ec2 = 0.000511;
+        const C_U = 8.85e-5;
+        const c = 3e8;
+
+        // Scenarios data (Frank LEP3 removed, reordered with Shatilov scenarios first)
+        const scenarios = {
+            shatilov_new_55: {
+                nb: 15, Nb: 2.7, circ: 26659, sigma_z: 2.36e-3,
+                eps_x: 4.2e-9, eps_y: 8.4e-12, beta_x: 1.0, beta_y: 2e-3,
+                theta: 30e-3, E_beam: 120.0, P_SR: 50.0
+            },
+            shatilov_new_68: {
+                nb: 15, Nb: 2.7, circ: 26659, sigma_z: 2.94e-3,
+                eps_x: 4.2e-9, eps_y: 8.4e-12, beta_x: 1.0, beta_y: 2e-3,
+                theta: 30e-3, E_beam: 120.0, P_SR: 50.0
+            },
+            shatilov_old: {
+                nb: 16, Nb: 2.3, circ: 26659, sigma_z: 2.65e-3,
+                eps_x: 4.6e-9, eps_y: 9.2e-12, beta_x: 1.0, beta_y: 2e-3,
+                theta: 30e-3, E_beam: 120.0, P_SR: 50.0
+            },
+            lep3_zh: {
+                nb: 20, Nb: 2.5, circ: 26659, sigma_z: 2.6e-3,
+                eps_x: 3.8e-9, eps_y: 7.5e-12, beta_x: 0.5, beta_y: 1e-3,
+                theta: 30e-3, E_beam: 115.0, P_SR: 50.0
+            },
+            lep3_ww: {
+                nb: 220, Nb: 1.0, circ: 26659, sigma_z: 2.9e-3,
+                eps_x: 1.8e-9, eps_y: 3.0e-12, beta_x: 0.2, beta_y: 1e-3,
+                theta: 30e-3, E_beam: 80.0, P_SR: 50.0
+            },
+            lep3_z: {
+                nb: 800, Nb: 2.6, circ: 26659, sigma_z: 9.4e-3,
+                eps_x: 0.6e-9, eps_y: 6.5e-12, beta_x: 0.1, beta_y: 1e-3,
+                theta: 30e-3, E_beam: 45.6, P_SR: 50.0
+            },
+            lep3_h: {
+                nb: 16, Nb: 2.7, circ: 26700, sigma_z: 2.36e-3,
+                eps_x: 4.2e-9, eps_y: 14e-12, beta_x: 1.0, beta_y: 2e-3,
+                theta: 30e-3, E_beam: 120.0, P_SR: 50.0
+            },
+            fcc_ee_h: {
+                nb: 328, Nb: 1.8, circ: 97750, sigma_z: 5.3e-3,
+                eps_x: 0.63e-9, eps_y: 1.3e-12, beta_x: 0.3, beta_y: 1e-3,
+                theta: 30e-3, E_beam: 120.0, P_SR: 50.0
+            },
+            fcc_ee_z: {
+                nb: 11200, Nb: 2.1768, circ: 90700, sigma_z: 15.2e-3,
+                eps_x: 0.71e-9, eps_y: 2.1e-12, beta_x: 110e-3, beta_y: 0.7e-3,
+                theta: 30e-3, E_beam: 45.6, P_SR: 50.0
+            },
+            fcc_ee_ww: {
+                nb: 1856, Nb: 1.37256, circ: 90700, sigma_z: 5.28e-3,
+                eps_x: 2.16e-9, eps_y: 2.0e-12, beta_x: 220e-3, beta_y: 1.0e-3,
+                theta: 30e-3, E_beam: 80.0, P_SR: 50.0
+            },
+            fcc_ee_zh: {
+                nb: 300, Nb: 1.68573, circ: 90700, sigma_z: 5.59e-3,
+                eps_x: 0.66e-9, eps_y: 1.0e-12, beta_x: 240e-3, beta_y: 1.0e-3,
+                theta: 30e-3, E_beam: 120.0, P_SR: 50.0
+            },
+            fcc_ee_tt: {
+                nb: 60, Nb: 1.60396, circ: 90700, sigma_z: 2.33e-3,
+                eps_x: 1.65e-9, eps_y: 1.32e-12, beta_x: 900e-3, beta_y: 1.4e-3,
+                theta: 30e-3, E_beam: 182.5, P_SR: 50.0
+            }
+        };
+
+        function loadScenario() {
+            const scenario = document.getElementById('scenario').value;
+            const params = scenarios[scenario];
+            
+            Object.keys(params).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = params[key];
+                }
+            });
+            
+            calculate();
+        }
+
+        function calculate() {
+            try {
+                // Get input values
+                const nb = parseFloat(document.getElementById('nb').value) || 0;
+                const Nb = (parseFloat(document.getElementById('Nb').value) || 0) * 1e11; // Convert from 10^11 units
+                const circ = parseFloat(document.getElementById('circ').value) || 0;
+                const sigma_z = parseFloat(document.getElementById('sigma_z').value) || 0;
+                const eps_x = parseFloat(document.getElementById('eps_x').value) || 0;
+                const eps_y = parseFloat(document.getElementById('eps_y').value) || 0;
+                const beta_x = parseFloat(document.getElementById('beta_x').value) || 0;
+                const beta_y = parseFloat(document.getElementById('beta_y').value) || 0;
+                const theta = parseFloat(document.getElementById('theta').value) || 0;
+                const E_beam = parseFloat(document.getElementById('E_beam').value) || 0;
+                const P_SR = parseFloat(document.getElementById('P_SR').value) || 0;
+
+                if (nb === 0 || Nb === 0 || circ === 0) {
+                    clearResults();
+                    return;
+                }
+
+                // Calculate derived parameters
+                const f_rev = c / circ;
+                const I_beam = e * f_rev * nb * Nb;
+                const sx = Math.sqrt(eps_x * beta_x);
+                const sy = Math.sqrt(eps_y * beta_y);
+                const gamma = E_beam / m_ec2;
+
+                // Calculate phi (Piwinski angle)
+                const phi = sigma_z * Math.tan(theta / 2) / sx;
+
+                // Calculate reduction factors with proper numerical integration
+                const R_ca = 1.0 / Math.sqrt(1 + phi * phi);
+                
+                // Proper hourglass and full factor calculations
+                const ux = beta_x / sigma_z;
+                const uy = beta_y / sigma_z;
+                const Ccos = Math.cos(theta / 2);
+                const Ttan = Math.tan(theta / 2);
+                
+                // Numerical integration for R_hg
+                const u_min = -50, u_max = 50, n_points = 10001;
+                const du = (u_max - u_min) / (n_points - 1);
+                
+                let sum_hg = 0;
+                let sum_full = 0;
+                
+                for (let i = 0; i < n_points; i++) {
+                    const u = u_min + i * du;
+                    const u2 = u * u;
+                    
+                    // Hourglass integrand
+                    const denom_hg = Math.sqrt((1 + u2/(ux*ux)) * (1 + u2/(uy*uy)));
+                    const integrand_hg = Math.exp(-u2) / denom_hg;
+                    sum_hg += integrand_hg;
+                    
+                    // Full integrand
+                    const exp_arg = -Ccos*Ccos * u2 * (1 + Ttan*Ttan * sigma_z*sigma_z / (sx*sx)) / (1 + u2/(ux*ux));
+                    const integrand_full = Math.exp(exp_arg) / denom_hg;
+                    sum_full += integrand_full;
+                }
+                
+                const R_hg = (1.0 / Math.sqrt(Math.PI)) * sum_hg * du;
+                const R_full = (Ccos / Math.sqrt(Math.PI)) * sum_full * du;
+
+                // Calculate luminosities
+                const L_geom = nb * Nb * Nb * f_rev / (4 * Math.PI * sx * sy) * 1e-4;
+                const L_full = L_geom * R_full;
+
+                // Calculate tune shift
+                const xi_nc = (r_e * Nb) / (2 * Math.PI * gamma) * (beta_y / (sy * (sx + sy)));
+                const xi_y = xi_nc / Math.sqrt(1 + phi * phi);
+
+                // Calculate energy loss and bending radius
+                const P_SR_W = P_SR * 1e6;
+                const U0 = P_SR_W / (I_beam * 1e9);
+                const rho_calc = C_U * Math.pow(E_beam, 4) / U0;
+
+                // Update results
+                document.getElementById('phi_result').textContent = phi.toFixed(3);
+                document.getElementById('R_hg_result').textContent = R_hg.toFixed(3);
+                document.getElementById('R_ca_result').textContent = R_ca.toFixed(3);
+                document.getElementById('R_full_result').textContent = R_full.toFixed(3);
+                document.getElementById('L_geom_result').textContent = (L_geom / 1e34).toFixed(3);
+                document.getElementById('L_full_result').textContent = (L_full / 1e34).toFixed(3);
+                document.getElementById('xi_y_result').textContent = xi_y.toFixed(3);
+                document.getElementById('I_beam_result').textContent = I_beam.toFixed(6);
+                document.getElementById('U0_result').textContent = U0.toFixed(6);
+                document.getElementById('rho_calc_result').textContent = rho_calc.toFixed(1);
+
+            } catch (error) {
+                console.error('Calculation error:', error);
+                clearResults();
+            }
+        }
+
+        function clearResults() {
+            const resultElements = [
+                'phi_result', 'R_hg_result', 'R_ca_result', 'R_full_result',
+                'L_geom_result', 'L_full_result', 'xi_y_result',
+                'I_beam_result', 'U0_result', 'rho_calc_result'
+            ];
+            resultElements.forEach(id => {
+                document.getElementById(id).textContent = '-';
+            });
+        }
+
+        // Load default scenario on page load
+        window.onload = function() {
+            loadScenario();
+        };
+    </script>
+</body>
+</html>
