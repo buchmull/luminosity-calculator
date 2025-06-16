@@ -183,9 +183,11 @@
         <div class="scenario-selector">
             <label for="scenario">Select Scenario: </label>
             <select id="scenario" onchange="loadScenario()">
-                <option value="shatilov_new_55">Shatilov new (φ=0.55)</option>
-                <option value="shatilov_new_68">Shatilov new (φ=0.68)</option>
-                <option value="shatilov_old">Shatilov old</option>
+                <option value="shatilov_new_55">Shatilov ZH new (φ=0.55)</option>
+                <option value="shatilov_new_68">Shatilov ZH new (φ=0.68)</option>
+                <option value="shatilov_old">Shatilov ZH old</option>
+                <option value="shatilov_z_358">Shatilov Z (σz=3.58mm)</option>
+                <option value="shatilov_z_396">Shatilov Z (φ=3.4 → σz=3.96mm)</option>
                 <option value="lep3_zh">LEP3 ZH</option>
                 <option value="lep3_ww">LEP3 WW</option>
                 <option value="lep3_z">LEP3 Z</option>
@@ -380,6 +382,16 @@
                 nb: 16, Nb: 2.3, circ: 26659, sigma_z: 2.65e-3,
                 eps_x: 4.6e-9, eps_y: 9.2e-12, beta_x: 1.0, beta_y: 2e-3,
                 theta: 30e-3, E_beam: 120.0, P_SR: 50.0
+            },
+            shatilov_z_358: {
+                nb: 2400, Nb: 0.8, circ: 26659, sigma_z: 3.58e-3,
+                eps_x: 0.61e-9, eps_y: 1.4e-12, beta_x: 0.5, beta_y: 1e-3,
+                theta: 30e-3, E_beam: 45.6, P_SR: 50.0
+            },
+            shatilov_z_396: {
+                nb: 2400, Nb: 0.8, circ: 26659, sigma_z: 3.96e-3,
+                eps_x: 0.61e-9, eps_y: 1.4e-12, beta_x: 0.5, beta_y: 1e-3,
+                theta: 30e-3, E_beam: 45.6, P_SR: 50.0
             },
             lep3_zh: {
                 nb: 20, Nb: 2.5, circ: 26659, sigma_z: 2.6e-3,
